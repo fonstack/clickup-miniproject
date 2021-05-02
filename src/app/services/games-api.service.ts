@@ -1,3 +1,4 @@
+import { RatingPipe } from './../pipes/rating.pipe';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Game } from '../models/Game';
@@ -8,7 +9,10 @@ import { Game } from '../models/Game';
 export class GamesApiService {
   itemsPerPage = 10;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private ratingPipe: RatingPipe,
+  ) { }
 
   async getGames(
     sortProperty?: 'name' | 'rating',
@@ -21,7 +25,7 @@ export class GamesApiService {
       results: res.results.map(r => ({
         id: r.id,
         name: r.name,
-        rating: r.rating,
+        rating: this.ratingPipe.transform(r.rating),
         playtime: r.playtime,
       })), totalPages: res.count
     };

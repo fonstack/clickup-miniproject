@@ -8,11 +8,13 @@ import { ClickupTableComponent } from './components/clickup-table/clickup-table.
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RatingPipe } from './pipes/rating.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     ClickupTableComponent,
+    RatingPipe,
   ],
   imports: [
     BrowserModule,
@@ -23,7 +25,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule,
     FormsModule
   ],
-  providers: [GamesApiService],
+  providers: [GamesApiService, RatingPipe],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
