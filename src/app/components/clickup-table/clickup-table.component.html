@@ -1,0 +1,41 @@
+<div class="clickup-table">
+  <div class="clickup-table__columns" cdkDropList cdkDropListOrientation="horizontal"
+    (cdkDropListDropped)="drop($event)">
+    <div class="clickup-table__columns__column" cdkDrag *ngFor="let column of tableColumns; let colIdx = index"
+      [style.width]="(column.width + 'px') || 'fit-content'">
+      <!-- {{column.width}} -->
+      <div class="clickup-table__columns__column__header">
+        <div class="clickup-table__columns__column__header__content"
+          (click)="reorder(tableBodyProperties[colIdx], column)" cdkDragHandle>
+          <span>{{column.title}}</span>
+          <div class="filter-icon" *ngIf="column.filter">
+            <img *ngIf="tableSorting?.property !== tableBodyProperties[colIdx]" src="../../../assets/icons/sort.png"
+              alt="sort">
+            <img *ngIf="tableSorting?.property === tableBodyProperties[colIdx] && tableSorting?.sort === 'asc'"
+              src="../../../assets/icons/sort_up.png" class="active" alt="sort-up">
+            <img *ngIf="tableSorting?.property === tableBodyProperties[colIdx] && tableSorting?.sort === 'desc'"
+              src="../../../assets/icons/sort_down.png" class="active" alt="sort-down">
+          </div>
+        </div>
+        <div class="resize-drag" (mousedown)="setResizing($event, colIdx)" (window:mouseup)="columnBeingResized = null">
+        </div>
+      </div>
+      <div class="clickup-table__columns__column__row" *ngFor="let row of tableBody">
+        {{row[tableBodyProperties[colIdx]]}}
+      </div>
+    </div>
+  </div>
+
+  <div class="clickup-table__pagination">
+    <div class="clickup-loader" [ngClass]="{show: tableLoading | async}">
+      <div class="lds-dual-ring"></div>
+    </div>
+    <div class="clickup-table__pagination__controls">
+      <img src="../../../assets/icons/back.png" (click)="changePage(-1)"
+        [ngClass]="{disabled: tablePagination.page === 1}">
+      <p>{{(((tablePagination.page - 1) * gamesApiService.itemsPerPage) + 1)}} - {{tablePagination.page *
+        gamesApiService.itemsPerPage}} of {{tablePagination.totalPages}}</p>
+      <img src="../../../assets/icons/forward.png" (click)="changePage(1)">
+    </div>
+  </div>
+</div>
