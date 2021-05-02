@@ -1,5 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -23,7 +23,7 @@ export interface ClickupTable<T> {
   templateUrl: './clickup-table.component.html',
   styleUrls: ['./clickup-table.component.scss']
 })
-export class ClickupTableComponent<T> implements OnInit {
+export class ClickupTableComponent<T> implements OnInit, OnChanges {
   @Input() tableColumns: { title: string, filter: boolean, comparator?: any, width?: number }[];
   @Input() tableBodyProperties: string[];
   @Input() tableBody: Array<T>;
@@ -53,6 +53,14 @@ export class ClickupTableComponent<T> implements OnInit {
     this.searchInput.valueChanges
       .pipe(debounceTime(1000))
       .subscribe(value => this.filterTableWith(value));
+  }
+
+  ngOnChanges(changes): void {
+    console.log(changes);
+    if (changes.tableBody) {
+      this.tableBodyToShow = this.tableBody;
+      this.searchInput.setValue('');
+    }
   }
 
   @HostListener('window:mousemove', ['$event'])

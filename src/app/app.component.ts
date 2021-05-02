@@ -56,7 +56,7 @@ export class AppComponent implements OnInit {
     this.loadingData.next(true);
     this.gamesData = await this.gamesApiService.getGames(
       changePage.tableReorder?.property, changePage.tableReorder?.sort,
-      this.tablePagination.page + changePage.change
+      this.tablePagination.page + changePage.change,
     );
     this.loadingData.next(false);
     this.tablePagination = { page: this.tablePagination.page + changePage.change, totalPages: this.gamesData.totalPages };
