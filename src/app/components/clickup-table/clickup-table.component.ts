@@ -41,8 +41,7 @@ export class ClickupTableComponent<T> implements OnInit, OnChanges {
   columnBeingResized: { idx: number, width: number, left: number };
 
   constructor(
-    public gamesApiService: GamesApiService,
-    private fb: FormBuilder,
+    public gamesApiService: GamesApiService
   ) { }
 
   ngOnInit(): void {
@@ -56,10 +55,9 @@ export class ClickupTableComponent<T> implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes): void {
-    console.log(changes);
     if (changes.tableBody) {
       this.tableBodyToShow = this.tableBody;
-      this.searchInput.setValue('');
+      this.searchInput?.setValue('');
     }
   }
 
@@ -69,6 +67,7 @@ export class ClickupTableComponent<T> implements OnInit, OnChanges {
     if (this.columnBeingResized) { this.resize(); }
   }
 
+  // Calculate the width of the column that is being resized
   resize(): void {
     this.tableColumns[this.columnBeingResized.idx].width =
       this.mouse.x >= this.columnBeingResized.left ?
@@ -81,19 +80,23 @@ export class ClickupTableComponent<T> implements OnInit, OnChanges {
     // this.tableColumns = [...this.tableColumns];
   }
 
+  // Set if some column is being resized
   setResizing(event: MouseEvent, colIdx: number): void {
     this.columnBeingResized = { idx: colIdx, width: (event as any).path[2].offsetWidth, left: event.clientX };
   }
 
+  // Reorder the columns
   drop(event: CdkDragDrop<string[]>): void {
     moveItemInArray(this.tableColumns, event.previousIndex, event.currentIndex);
     moveItemInArray(this.tableBodyProperties, event.previousIndex, event.currentIndex);
   }
 
+  // Filter the table content with the search query
   filterTableWith(value: string): void {
     this.tableBodyToShow = this.tableBody.filter(row => Object.values(row).join(' ').toLowerCase().includes(value.toLowerCase()));
   }
 
+  // Sort the columns. If the column have comparator means no call to API and only local sorting.
   reorder(bodyProperty: string, column?: any): void {
     if (column.filter && !column.comparatorDesc && !column.comparatorAsc) {
       if (this.tableSorting?.property === bodyProperty && this.tableSorting?.sort === 'asc') {
@@ -118,6 +121,7 @@ export class ClickupTableComponent<T> implements OnInit, OnChanges {
     }
   }
 
+  // Change page for pagination
   changePage(change: number): void {
     if (this.tablePagination.page !== 1 || change !== -1) {
       this.doChangePage.emit({ change, tableReorder: this.tableSorting });
