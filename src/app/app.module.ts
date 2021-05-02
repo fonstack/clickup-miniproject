@@ -7,6 +7,7 @@ import { AppComponent } from './app.component';
 import { ClickupTableComponent } from './components/clickup-table/clickup-table.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,8 @@ import { HttpClientModule } from '@angular/common/http';
     BrowserAnimationsModule,
     DragDropModule,
     HttpClientModule,
+    ReactiveFormsModule,
+    FormsModule
   ],
   providers: [GamesApiService],
   bootstrap: [AppComponent]

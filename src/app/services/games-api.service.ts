@@ -10,10 +10,20 @@ export class GamesApiService {
 
   constructor(private http: HttpClient) { }
 
-  async getGames(sortProperty?: 'name' | 'rating', sortType?: 'asc' | 'desc', page?: number): Promise<{ results: Game[], totalPages: number }> {
+  async getGames(
+    sortProperty?: 'name' | 'rating',
+    sortType?: 'asc' | 'desc', page?: number
+  ): Promise<{ results: Game[], totalPages: number }> {
     const res = await this.http.get<any>(
       `https://api.rawg.io/api/games?key=1664eafef3fd4d29a6074b5a01229530&page_size=${this.itemsPerPage}&page=${page || 1}&ordering=${((sortType === 'asc' || !sortType) ? '' : '-') + (sortProperty || '')}`
     ).toPromise();
-    return { results: res.results, totalPages: res.count };
+    return {
+      results: res.results.map(r => ({
+        id: r.id,
+        name: r.name,
+        rating: r.rating,
+        playtime: r.playtime,
+      })), totalPages: res.count
+    };
   }
 }

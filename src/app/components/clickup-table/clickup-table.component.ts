@@ -1,6 +1,8 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { FormBuilder, FormControl } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { GamesApiService } from 'src/app/services/games-api.service';
 
 export interface ClickupTable<T> {
@@ -25,6 +27,7 @@ export class ClickupTableComponent<T> implements OnInit {
   @Input() tableColumns: { title: string, filter: boolean, comparator?: any, width?: number }[];
   @Input() tableBodyProperties: string[];
   @Input() tableBody: Array<T>;
+  tableBodyToShow: Array<T>;
   @Input() tablePagination: { page: number, totalPages: number };
   @Input() tableSorting: { property: string, sort: 'asc' | 'desc' };
   @Output() doReorder = new EventEmitter<{ property: string, sort: 'asc' | 'desc' }>();
@@ -33,15 +36,23 @@ export class ClickupTableComponent<T> implements OnInit {
   @Input() tableLoading: BehaviorSubject<boolean>;
 
   // Other funcs
+  searchInput: FormControl;
   mouse: { x: number, y: number };
   columnBeingResized: { idx: number, width: number, left: number };
 
   constructor(
-    public gamesApiService: GamesApiService
+    public gamesApiService: GamesApiService,
+    private fb: FormBuilder,
   ) { }
 
   ngOnInit(): void {
+    this.searchInput = new FormControl('');
+    this.tableBodyToShow = this.tableBody;
 
+    // Debounce time in order to not saturate the backend
+    this.searchInput.valueChanges
+      .pipe(debounceTime(1000))
+      .subscribe(value => this.filterTableWith(value));
   }
 
   @HostListener('window:mousemove', ['$event'])
@@ -71,6 +82,10 @@ export class ClickupTableComponent<T> implements OnInit {
     moveItemInArray(this.tableBodyProperties, event.previousIndex, event.currentIndex);
   }
 
+  filterTableWith(value: string): void {
+    this.tableBodyToShow = this.tableBody.filter(row => Object.values(row).join(' ').toLowerCase().includes(value.toLowerCase()));
+  }
+
   reorder(bodyProperty: string, column?: any): void {
     if (column.filter && !column.comparatorDesc && !column.comparatorAsc) {
       if (this.tableSorting?.property === bodyProperty && this.tableSorting?.sort === 'asc') {
@@ -85,12 +100,12 @@ export class ClickupTableComponent<T> implements OnInit {
     } else if (column.filter && column.comparatorAsc && column.comparatorDesc) {
       if (this.tableSorting?.property === bodyProperty && this.tableSorting?.sort === 'asc') {
         this.tableSorting = { property: bodyProperty, sort: 'desc' };
-        this.tableBody.sort(column.comparatorDesc);
+        this.tableBodyToShow.sort(column.comparatorDesc);
       } else if (this.tableSorting?.property === bodyProperty && this.tableSorting?.sort === 'desc') {
         this.tableSorting = null;
       } else {
         this.tableSorting = { property: bodyProperty, sort: 'asc' };
-        this.tableBody.sort(column.comparatorAsc);
+        this.tableBodyToShow.sort(column.comparatorAsc);
       }
     }
   }

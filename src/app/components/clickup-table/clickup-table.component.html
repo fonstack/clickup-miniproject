@@ -1,4 +1,10 @@
 <div class="clickup-table">
+  <!-- Searchbar -->
+  <div class="clickup-table__search">
+    <input type="search" placeholder="Search something..." [formControl]="searchInput">
+  </div>
+
+  <!-- Table -->
   <div class="clickup-table__columns" cdkDropList cdkDropListOrientation="horizontal"
     (cdkDropListDropped)="drop($event)">
     <div class="clickup-table__columns__column" cdkDrag *ngFor="let column of tableColumns; let colIdx = index"
@@ -20,7 +26,7 @@
         <div class="resize-drag" (mousedown)="setResizing($event, colIdx)" (window:mouseup)="columnBeingResized = null">
         </div>
       </div>
-      <div class="clickup-table__columns__column__row" *ngFor="let row of tableBody">
+      <div class="clickup-table__columns__column__row" *ngFor="let row of tableBodyToShow">
         {{row[tableBodyProperties[colIdx]]}}
       </div>
     </div>
