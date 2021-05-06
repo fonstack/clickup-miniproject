@@ -36,7 +36,7 @@
     <div class="clickup-loader" [ngClass]="{show: tableLoading | async}">
       <div class="lds-dual-ring"></div>
     </div>
-    <div class="clickup-table__pagination__controls">
+    <div class="clickup-table__pagination__controls" *ngIf="tablePagination">
       <img src="../../../assets/icons/back.png" (click)="changePage(-1)"
         [ngClass]="{disabled: tablePagination.page === 1}">
       <p>{{(((tablePagination.page - 1) * gamesApiService.itemsPerPage) + 1)}} - {{tablePagination.page *

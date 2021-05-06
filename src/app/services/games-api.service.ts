@@ -1,7 +1,9 @@
 import { RatingPipe } from './../pipes/rating.pipe';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Game } from '../models/Game';
+import { Game, GamesData } from '../models/Game';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -14,20 +16,19 @@ export class GamesApiService {
     private ratingPipe: RatingPipe,
   ) { }
 
-  async getGames(
-    sortProperty?: 'name' | 'rating',
-    sortType?: 'asc' | 'desc', page?: number
-  ): Promise<{ results: Game[], totalPages: number }> {
-    const res = await this.http.get<any>(
-      `https://api.rawg.io/api/games?key=1664eafef3fd4d29a6074b5a01229530&page_size=${this.itemsPerPage}&page=${page || 1}&ordering=${((sortType === 'asc' || !sortType) ? '' : '-') + (sortProperty || '')}`
-    ).toPromise();
-    return {
-      results: res.results.map(r => ({
-        id: r.id,
-        name: r.name,
-        rating: this.ratingPipe.transform(r.rating),
-        playtime: r.playtime,
-      })), totalPages: res.count
-    };
+  getGames(data: { sortProperty?: 'name' | 'rating', sortType?: 'asc' | 'desc', page?: number }): Observable<GamesData> {
+    return this.http.get<any>(
+      `https://api.rawg.io/api/games?key=1664eafef3fd4d29a6074b5a01229530&page_size=${this.itemsPerPage}&page=${data.page || 1}&ordering=${((data.sortType === 'asc' || !data.sortType) ? '' : '-') + (data.sortProperty || '')}`
+    ).pipe(
+      map(res => ({
+        results: res.results.map(r => ({
+          id: r.id,
+          name: r.name,
+          rating: this.ratingPipe.transform(r.rating),
+          playtime: r.playtime,
+        })), totalPages: res.count,
+        actualPage: data.page || 1,
+      }))
+    );
   }
 }

@@ -4,3 +4,9 @@ export interface Game {
   rating: number;
   playtime: number;
 }
+
+export interface GamesData {
+  results: Game[];
+  actualPage: number;
+  totalPages: number;
+}

@@ -1,27 +1,36 @@
 import { GamesApiService } from './services/games-api.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ClickupTable } from './components/clickup-table/clickup-table.component';
-import { Game } from './models/Game';
-import { BehaviorSubject } from 'rxjs';
+import { Game, GamesData } from './models/Game';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+// Ngrx
+import * as gamesActions from './store/actions/games.actions';
+import { select, Store } from '@ngrx/store';
+import { take, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
-  gamesData: { results: Game[], totalPages: number };
+export class AppComponent implements OnInit, OnDestroy {
+  private destroyed$ = new Subject<boolean>();
+
+  gamesData$: Observable<GamesData>;
   loadingData = new BehaviorSubject<boolean>(false);
   tablePagination: { page: number, totalPages: number };
   dataTable: ClickupTable<Game>;
 
-  constructor(
-    private gamesApiService: GamesApiService
-  ) { }
+  constructor(private store: Store<{ games: GamesData }>) { }
 
-  async ngOnInit(): Promise<void> {
-    this.gamesData = (await this.gamesApiService.getGames());
-    this.tablePagination = { page: 1, totalPages: this.gamesData.totalPages };
+  ngOnInit(): void {
+    this.gamesData$ = this.store.pipe(select('games'));
+    this.store.dispatch(gamesActions.GET_GAMES_DATA({}));
+    this.gamesData$.pipe(takeUntil(this.destroyed$)).subscribe(gamesData => {
+      console.log('State ->', gamesData);
+      this.loadingData.next(false);
+      this.tablePagination = { page: gamesData?.actualPage, totalPages: gamesData?.totalPages };
+    });
 
     // Only name and rating can be sorted because the API only supports these properties :(
     // buuuut, in order to measure my knowledge I'll implement a comparator for those properties that
@@ -45,20 +54,21 @@ export class AppComponent implements OnInit {
     };
   }
 
-  async reorderTable(tableReorder: { property: 'name' | 'rating', sort: 'asc' | 'desc' }): Promise<void> {
-    this.loadingData.next(true);
-    this.gamesData = await this.gamesApiService.getGames(tableReorder?.property, tableReorder?.sort);
-    this.loadingData.next(false);
-    this.tablePagination = { page: 1, totalPages: this.gamesData.totalPages };
+  ngOnDestroy(): void {
+    this.destroyed$.next(true);
   }
 
-  async changePage(changePage: { change: number, tableReorder: { property: 'name' | 'rating', sort: 'asc' | 'desc' } }): Promise<void> {
+  reorderTable(tableReorder: { property: 'name' | 'rating', sort: 'asc' | 'desc' }): void {
     this.loadingData.next(true);
-    this.gamesData = await this.gamesApiService.getGames(
-      changePage.tableReorder?.property, changePage.tableReorder?.sort,
-      this.tablePagination.page + changePage.change,
-    );
-    this.loadingData.next(false);
-    this.tablePagination = { page: this.tablePagination.page + changePage.change, totalPages: this.gamesData.totalPages };
+    this.store.dispatch(gamesActions.GET_GAMES_DATA({ sortProperty: tableReorder?.property, sortType: tableReorder?.sort }));
+  }
+
+  changePage(changePage: { change: number, tableReorder: { property: 'name' | 'rating', sort: 'asc' | 'desc' } }): void {
+    this.loadingData.next(true);
+    this.store.dispatch(gamesActions.GET_GAMES_DATA({
+      sortProperty: changePage.tableReorder?.property,
+      sortType: changePage.tableReorder?.sort,
+      page: this.tablePagination.page + changePage.change,
+    }));
   }
 }

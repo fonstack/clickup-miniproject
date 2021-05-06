@@ -1,8 +1,12 @@
 <div class="container">
   <img src="https://app-cdn.clickup.com/assets/images/brand/clickup-symbol_color.svg" alt="logo">
   <h2>ClickUp Miniproject <br> Carlos Fontes <br> <small>fonstack@gmail.com</small></h2>
-  <clickup-table *ngIf="dataTable" [tableColumns]="dataTable.tableColumns" [tablePagination]="tablePagination"
-    [tableBodyProperties]="dataTable.tableBodyProperties" [tableBody]="gamesData.results" [tableLoading]="loadingData"
-    (doReorder)="reorderTable($event)" (doChangePage)="changePage($event)">
-  </clickup-table>
+
+  <ng-container *ngIf="gamesData$ | async as gamesData">
+    <clickup-table *ngIf="dataTable" [tableColumns]="dataTable.tableColumns" [tablePagination]="tablePagination"
+      [tableBodyProperties]="dataTable.tableBodyProperties" [tableBody]="gamesData.results" [tableLoading]="loadingData"
+      (doReorder)="reorderTable($event)" (doChangePage)="changePage($event)">
+    </clickup-table>
+  </ng-container>
+
 </div>

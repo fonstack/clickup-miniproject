@@ -1,3 +1,4 @@
+import { GamesApiEffects } from './store/effects/games-api.effects';
 import { GamesApiService } from './services/games-api.service';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -9,6 +10,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RatingPipe } from './pipes/rating.pipe';
+import { StoreModule } from '@ngrx/store';
+import { gamesReducer } from './store/reducers/games.reducer';
+import { EffectsModule } from '@ngrx/effects';
 
 @NgModule({
   declarations: [
@@ -23,7 +27,9 @@ import { RatingPipe } from './pipes/rating.pipe';
     DragDropModule,
     HttpClientModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    StoreModule.forRoot({ games: gamesReducer }),
+    EffectsModule.forRoot([GamesApiEffects]),
   ],
   providers: [GamesApiService, RatingPipe],
   bootstrap: [AppComponent]
